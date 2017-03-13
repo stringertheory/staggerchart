@@ -1,5 +1,7 @@
 // http://peterbeshai.com/scatterplot-in-d3-with-voronoi-interaction.html
 
+
+
 d3.json('staggerchart.json', function (error, data) {
 
   var xAll = [];
@@ -54,7 +56,7 @@ d3.json('staggerchart.json', function (error, data) {
       .y(function(d) { return yScale(d[1]); });
   
   // select the root container where the chart will be added
-  const container = d3.select('#vis-container');
+  const container = d3.select('#linechart-container');
 
   // initialize main SVG
   const svg = container.append('svg')
