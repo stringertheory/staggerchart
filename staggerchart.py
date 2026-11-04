@@ -13,7 +13,6 @@ https://flowingdata.com/2015/01/08/japan-fertility-rate-forecasts-versus-reality
 import sys
 import csv
 import json
-import random
 
 def create_json(filename):
     """Create a JSON output from a CSV of the following data:
@@ -24,47 +23,42 @@ def create_json(filename):
     prospective = {}
     retrospective = {}
 
-    with open(filename) as infile:
+    with open(filename, newline='') as infile:
 
         reader = csv.reader(infile)
 
         # ignore first row
-        reader.next()
+        next(reader)
 
         # pick out row with "forecast for" labels
-        forecast_for_row = reader.next()
+        forecast_for_row = next(reader)
 
         for row in reader:
             forecast_made = row[0]
-            for forecast_for, value in zip(forecast_for_row, row)[1:]:
+            for forecast_for, value in list(zip(forecast_for_row, row))[1:]:
                 if value:
-
-                    if not prospective.has_key(forecast_made):
-                        prospective[forecast_made] = []
-
-                    if not retrospective.has_key(forecast_for):
-                        retrospective[forecast_for] = []
-
-                    value = float(value) + 5 * (random.random() - 0.5)
+                    value = float(value)
                     prospective_item = [forecast_for, value]
                     retrospective_item = [forecast_made, value]
-                    prospective[forecast_made].append(prospective_item)
-                    retrospective[forecast_for].append(retrospective_item)
+                    prospective.setdefault(forecast_made, []).append(prospective_item)
+                    retrospective.setdefault(forecast_for, []).append(retrospective_item)
 
                     if forecast_made == forecast_for:
                         actual.append(prospective_item)
 
     actual_points = set(d[0] for d in actual)
-    for forecast_for, data in retrospective.items():
-        if forecast_for not in actual_points:
-            del retrospective[forecast_for]
-                        
+    retrospective = {
+        forecast_for: data
+        for forecast_for, data in retrospective.items()
+        if forecast_for in actual_points
+    }
+
     data = {
         'actual': actual,
         'prospective': sorted(prospective.values()),
         'retrospective': sorted(retrospective.values()),
     }
-                        
+
     return json.dumps(data)
 
-print create_json(sys.argv[1])
+print(create_json(sys.argv[1]))
